@@ -1,0 +1,74 @@
+{
+  "features": {
+    "categorical": [
+      "Store",
+      "DayOfWeek",
+      "Promo",
+      "StateHoliday",
+      "SchoolHoliday"
+    ],
+    "horizon": 1,
+    "numeric": [
+      "Customers",
+      "Sales",
+      "CompetitionDistance",
+      "Sales_lag_1",
+      "Sales_lag_7",
+      "Sales_lag_14",
+      "Sales_roll7",
+      "Sales_roll14",
+      "year",
+      "month",
+      "day",
+      "weekofyear",
+      "is_weekend"
+    ],
+    "target": "Sales"
+  },
+  "linear_regression": {
+    "fit_intercept": true
+  },
+  "paths": {
+    "artifacts_dir": "D:\\Semester-3\\AAI-551 Python\\Project\\tabtransformer_sales\\artifacts",
+    "metadata_filename": "metadata.json",
+    "processed_dir": "D:\\Semester-3\\AAI-551 Python\\Project\\tabtransformer_sales\\data\\processed",
+    "processed_filename": "sales_processed.parquet",
+    "raw_csv": "D:\\Semester-3\\AAI-551 Python\\Project\\tabtransformer_sales\\data\\raw\\train.csv",
+    "store_csv": "D:\\Semester-3\\AAI-551 Python\\Project\\tabtransformer_sales\\data\\raw\\store.csv",
+    "test_csv": "D:\\Semester-3\\AAI-551 Python\\Project\\tabtransformer_sales\\data\\raw\\test.csv",
+    "train_csv": "D:\\Semester-3\\AAI-551 Python\\Project\\tabtransformer_sales\\data\\raw\\train.csv"
+  },
+  "splits": {
+    "strategy": "ratios",
+    "test_ratio": 0.15,
+    "train_ratio": 0.7,
+    "val_ratio": 0.15
+  },
+  "tabtransformer": {
+    "d_model": 64,
+    "dropout": 0.1,
+    "emb_strategy": "auto",
+    "ff_dim": 128,
+    "n_heads": 4,
+    "n_layers": 2
+  },
+  "training": {
+    "amp": true,
+    "batch_size": 128,
+    "device": "cuda",
+    "epochs": 30,
+    "grad_clip": 1.0,
+    "lr": 0.001,
+    "patience": 5,
+    "plot_attention": false,
+    "seed": 42,
+    "weight_decay": 0.01
+  },
+  "xgboost": {
+    "colsample_bytree": 0.8,
+    "learning_rate": 0.1,
+    "max_depth": 6,
+    "n_estimators": 300,
+    "subsample": 0.8
+  }
+}

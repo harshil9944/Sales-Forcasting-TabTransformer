@@ -1,0 +1,70 @@
+paths:
+  raw_csv: data/raw/train.csv
+  train_csv: data/raw/train.csv
+  test_csv: data/raw/test.csv
+  store_csv: data/raw/store.csv
+  processed_dir: data/processed
+  processed_filename: sales_processed.parquet
+  metadata_filename: metadata.json
+  artifacts_dir: artifacts
+
+features:
+  target: Sales
+  horizon: 1
+  categorical:
+    - Store
+    - DayOfWeek
+    - Promo
+    - StateHoliday
+    - SchoolHoliday
+  numeric:
+    - Customers
+    - Sales
+    - CompetitionDistance
+    - Sales_lag_1
+    - Sales_lag_7
+    - Sales_lag_14
+    - Sales_roll7
+    - Sales_roll14
+    - year
+    - month
+    - day
+    - weekofyear
+    - is_weekend
+
+splits:
+  strategy: ratios  # or "dates"
+  train_ratio: 0.7
+  val_ratio: 0.15
+  test_ratio: 0.15
+  # For date strategy, provide YYYY-MM-DD strings for *_end_date keys.
+
+training:
+  seed: 42
+  batch_size: 256
+  lr: 0.0005
+  weight_decay: 0.0001
+  epochs: 150
+  patience: 5
+  grad_clip: 1.0
+  device: cpu
+  amp: false
+  plot_attention: false
+
+xgboost:
+  n_estimators: 300
+  max_depth: 6
+  learning_rate: 0.1
+  subsample: 0.8
+  colsample_bytree: 0.8
+
+linear_regression:
+  fit_intercept: true
+
+tabtransformer:
+  n_layers: 4
+  n_heads: 4
+  d_model: 128
+  ff_dim: 256
+  dropout: 0.1
+  emb_strategy: auto  # auto computes sqrt dims per categorical

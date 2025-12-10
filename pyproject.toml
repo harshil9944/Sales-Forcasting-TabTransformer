@@ -1,0 +1,27 @@
+﻿[project]
+name = "tabtransformer-sales"
+version = "0.1.0"
+description = "Sales forecasting with TabTransformer, Linear Regression, and XGBoost"
+requires-python = ">=3.10"
+readme = "README.md"
+authors = [{name = "Codex"}]
+dependencies = []
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+known_first_party = ["tabtransformer_sales"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+ignore_missing_imports = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_unreachable = true
