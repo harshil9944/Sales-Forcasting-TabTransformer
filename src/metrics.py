@@ -11,6 +11,7 @@ METRIC_ORDER = ("MAE", "RMSE", "R2", "MAPE")
 
 
 def evaluate_metrics(y_true: Iterable[float], y_pred: Iterable[float]) -> Dict[str, float]:
+    """Compute standard regression metrics (MAE, RMSE, R2, MAPE) from true and predicted arrays."""
     y_true_arr = np.asarray(list(y_true), dtype=np.float64)
     y_pred_arr = np.asarray(list(y_pred), dtype=np.float64)
     if y_true_arr.shape != y_pred_arr.shape:
@@ -24,6 +25,7 @@ def evaluate_metrics(y_true: Iterable[float], y_pred: Iterable[float]) -> Dict[s
 
 
 def metrics_table(metrics: Dict[str, float]) -> str:
+    """Render a small Markdown table from a metrics dictionary."""
     header = "| Metric | Value |\n| --- | --- |"
     rows = [f"| {name} | {metrics[name]:.4f} |" for name in METRIC_ORDER if name in metrics]
     return "\n".join([header, *rows])

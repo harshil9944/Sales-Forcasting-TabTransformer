@@ -1,6 +1,6 @@
 ﻿# TabTransformer Sales Forecasting
 
-Production-ready repository for forecasting Rossmann-style store sales using classical baselines and a TabTransformer deep model. The pipeline engineers temporal features, trains models with deterministic splits, and exports metrics, checkpoints, and diagnostic plots.
+Development-focused repository for forecasting Rossmann-style store sales using classical baselines and a TabTransformer deep model. The pipeline engineers temporal features, trains models with deterministic splits, and exports metrics, checkpoints, and diagnostic plots for experimentation.
 
 ## Features
 - Data preparation: date parsing, lag/rolling features, calendar attributes, categorical casting, parquet + metadata export
@@ -9,6 +9,25 @@ Production-ready repository for forecasting Rossmann-style store sales using cla
 - Evaluation: MAE/RMSE/R2/MAPE metrics, scatter + residual plots, optional attention visualization
 - CLI workflow: `prepare`, `train`, `eval`, `predict` commands backed by YAML configuration
 - Tooling: Makefile targets, pytest suite, mypy/black/isort configuration
+
+## Team
+- Harshil Patel (hpatel17@stevens.edu)
+- Christopher Meumann (cmeumann@stevens.edu)
+
+## Contributions
+- Harshil Patel
+    - Setup data processing for dataset sales CSVs and split dataset into training, validation and testing.
+    - Built logging for each process happens in system.
+    - Built TabTransformer model.
+    - Built training configuration for all models.
+    - Built Command line interface for performing actions to run application.
+
+
+
+- Christopher Meumann:
+    - built linear regression & XGBoost models.
+    - Wrote Tests for application.
+    - built module for computing metrics, save metrics, load models for prediction, save plots too.
 
 ## Getting Started
 ```bash
@@ -33,14 +52,6 @@ python -m tabtransformer_sales.src.cli eval    --config config/default.yaml --mo
 python -m tabtransformer_sales.src.cli predict --config config/default.yaml --model tabtx --input data/raw/sample.csv --output artifacts/tabtx/preds.csv
 ```
 Each command saves outputs under `artifacts/{model_name}/` and logs metrics to stdout.
-
-## Notebook Walkthrough
-Prefer an interactive experience? Open `notebooks/sales_forecasting.ipynb` in JupyterLab/VS Code.  
-The notebook:
-- synthesizes a Rossmann-style dataset with Python loops and comprehensions,
-- loads and tweaks the YAML config in-memory,
-- calls the shared `data`, `train`, and `evaluate` modules (ensuring parity with the CLI), and
-- inspects the operator-overloaded `MetricsReport` helper for a nicely formatted metric table.
 
 ## Example Metrics (synthetic sample)
 | Metric | Linear Regression | XGBoost | TabTransformer |

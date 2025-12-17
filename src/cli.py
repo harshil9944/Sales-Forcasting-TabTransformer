@@ -13,6 +13,7 @@ LOGGER = utils.configure_logging(__name__)
 
 
 def _load_config(path: str) -> dict[str, Any]:
+    """Load and normalize YAML config paths relative to the project root or config file location."""
     config_path = Path(path).resolve()
     config = utils.load_yaml(config_path)
     project_root = Path(__file__).resolve().parents[1]
@@ -21,6 +22,7 @@ def _load_config(path: str) -> dict[str, Any]:
 
 
 def cmd_prepare(args: argparse.Namespace) -> None:
+    """CLI entrypoint for dataset preparation from raw CSV."""
     config = _load_config(args.config)
     raw_path = args.input or config.get("paths", {}).get("raw_csv")
     if not raw_path:
@@ -35,18 +37,21 @@ def cmd_prepare(args: argparse.Namespace) -> None:
 
 
 def cmd_train(args: argparse.Namespace) -> None:
+    """CLI entrypoint for training a configured model."""
     config = _load_config(args.config)
     result = train.train_pipeline(config, args.model)
     LOGGER.info("Artifacts written to %s", result["artifacts"])
 
 
 def cmd_eval(args: argparse.Namespace) -> None:
+    """CLI entrypoint for evaluating a trained model on a requested split."""
     config = _load_config(args.config)
     metric_values = evaluate.evaluate_pipeline(config, args.model, split=args.split)
     LOGGER.info("%s", metrics_table(metric_values))
 
 
 def cmd_predict(args: argparse.Namespace) -> None:
+    """CLI entrypoint for running batch inference and writing predictions to CSV."""
     config = _load_config(args.config)
     artifact_dir = utils.get_artifact_dir(config, args.model.lower())
     model = evaluate.load_trained_model(args.model, artifact_dir, config)
@@ -67,6 +72,7 @@ def cmd_predict(args: argparse.Namespace) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
+    """Construct the top-level argparse parser and subcommands."""
     parser = argparse.ArgumentParser(description="TabTransformer sales forecasting CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 

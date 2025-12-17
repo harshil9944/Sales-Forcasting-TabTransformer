@@ -17,6 +17,7 @@ LOGGER = utils.configure_logging(__name__)
 
 
 def load_trained_model(model_name: str, artifact_dir: Path, config: Dict[str, Any]):
+    """Load a persisted model artifact for the given name from the artifact directory."""
     name = model_name.lower()
     if name in {"linreg", "linear", "linear_regression"}:
         path = artifact_dir / "model.joblib"
@@ -30,6 +31,7 @@ def load_trained_model(model_name: str, artifact_dir: Path, config: Dict[str, An
 
 
 def _plot_scatter(y_true: pd.Series, y_pred: pd.Series, output: Path) -> None:
+    """Plot predicted vs. actual scatter and save to *output* path."""
     fig, ax = plt.subplots(figsize=(6, 6))
     ax.scatter(y_true, y_pred, alpha=0.5, s=12, c="#1f77b4")
     lims = [min(y_true.min(), y_pred.min()), max(y_true.max(), y_pred.max())]
@@ -43,6 +45,7 @@ def _plot_scatter(y_true: pd.Series, y_pred: pd.Series, output: Path) -> None:
 
 
 def _plot_residuals(y_true: pd.Series, y_pred: pd.Series, output: Path) -> None:
+    """Plot residual histogram to help inspect model error distribution."""
     residuals = y_pred - y_true
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.hist(residuals, bins=30, color="#ff7f0e", alpha=0.7)
@@ -55,6 +58,7 @@ def _plot_residuals(y_true: pd.Series, y_pred: pd.Series, output: Path) -> None:
 
 
 def _plot_attention_heatmap(model: SalesForecastTabTransformer, output: Path, categorical: list[str]) -> None:
+    """Render the first-layer attention heatmap when available from the TabTransformer."""
     if model.attention_cache is None:
         return
     attn = model.attention_cache.mean(dim=1).squeeze(0).numpy()
@@ -73,6 +77,7 @@ def _plot_attention_heatmap(model: SalesForecastTabTransformer, output: Path, ca
 
 
 def evaluate_pipeline(config: Dict[str, Any], model_name: str, split: str = "test") -> Dict[str, Any]:
+    """Evaluate a trained model on a dataset split, plot diagnostics, and save metrics."""
     X, y, metadata = data.load_dataset_from_config(config)
     splits = data.time_aware_split(X, y, metadata.get("dates"), config.get("splits", {}))
     if split not in splits:

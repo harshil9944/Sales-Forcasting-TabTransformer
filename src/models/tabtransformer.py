@@ -14,19 +14,26 @@ from .base import BaseModel
 
 
 class TabularDataset(Dataset[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]):
+    """Tiny dataset wrapper for categorical, numeric, and target tensors."""
+
     def __init__(self, cat: np.ndarray, num: np.ndarray, target: np.ndarray) -> None:
+        """Convert numpy arrays into torch tensors for DataLoader consumption."""
         self.cat = torch.tensor(cat, dtype=torch.long)
         self.num = torch.tensor(num, dtype=torch.float32)
         self.target = torch.tensor(target, dtype=torch.float32)
 
     def __len__(self) -> int:
+        """Number of examples in the dataset."""
         return len(self.target)
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Return a single (categorical, numeric, target) tuple."""
         return self.cat[idx], self.num[idx], self.target[idx]
 
 
 class TabTransformerEncoderLayer(nn.Module):
+    """Single Transformer encoder block with attention and feed-forward sublayers."""
+
     def __init__(self, d_model: int, n_heads: int, ff_dim: int, dropout: float) -> None:
         super().__init__()
         self.attn = nn.MultiheadAttention(d_model, n_heads, dropout=dropout, batch_first=True)
@@ -41,6 +48,7 @@ class TabTransformerEncoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Run self-attention + feed-forward stack and return activations and attention map."""
         attn_out, attn_map = self.attn(x, x, x, need_weights=True, average_attn_weights=False)
         x = self.norm1(x + self.dropout(attn_out))
         x = self.norm2(x + self.dropout(self.ffn(x)))
@@ -48,6 +56,8 @@ class TabTransformerEncoderLayer(nn.Module):
 
 
 class TabTransformerNet(nn.Module):
+    """Full TabTransformer network that embeds categoricals and fuses numeric features."""
+
     def __init__(
         self,
         embedding_dims: Dict[str, Tuple[int, int]],
@@ -81,6 +91,7 @@ class TabTransformerNet(nn.Module):
         )
 
     def forward(self, cat: torch.Tensor, num: torch.Tensor) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
+        """Perform a forward pass returning predictions and an optional attention snapshot."""
         tokens = []
         for idx, col in enumerate(self.categorical_order):
             emb = self.embeddings[col](cat[:, idx])
@@ -119,6 +130,7 @@ class SalesForecastTabTransformer(BaseModel):
         target: str = "Sales",
         device: str = "cpu",
     ) -> None:
+        """Initialize a TabTransformer forecaster with configuration and feature lists."""
         super().__init__("tabtx")
         self.model_config = model_config
         self.categorical_features = categorical_features
@@ -132,12 +144,14 @@ class SalesForecastTabTransformer(BaseModel):
         self.attention_cache: Optional[torch.Tensor] = None
 
     def _fit_category_maps(self, X: pd.DataFrame) -> None:
+        """Build per-column vocabularies mapping category string to integer id."""
         for col in self.categorical_features:
             values = X[col].astype(str).fillna("__NA__")
             uniques = sorted(values.unique())
             self.category_maps[col] = {val: idx + 1 for idx, val in enumerate(uniques)}
 
     def _transform_categories(self, X: pd.DataFrame) -> np.ndarray:
+        """Map categorical columns to integer ids using fitted vocabularies."""
         arrays = []
         for col in self.categorical_features:
             mapping = self.category_maps[col]
@@ -148,6 +162,7 @@ class SalesForecastTabTransformer(BaseModel):
         return np.zeros((len(X), 1), dtype=np.int64)
 
     def _transform_numeric(self, X: pd.DataFrame, fit: bool = False) -> np.ndarray:
+        """Scale numeric features with a shared StandardScaler; optionally fit it."""
         if not self.numeric_features:
             return np.zeros((len(X), 0), dtype=np.float32)
         data = X[self.numeric_features].astype(float).fillna(0.0)
@@ -160,6 +175,7 @@ class SalesForecastTabTransformer(BaseModel):
         return scaled.astype(np.float32)
 
     def _build_model(self) -> None:
+        """Instantiate the TabTransformer network based on configuration and vocab sizes."""
         embedding_dims = {}
         strategy = self.model_config.get("emb_strategy", "auto")
         for col in self.categorical_features:
@@ -187,6 +203,7 @@ class SalesForecastTabTransformer(BaseModel):
         val_data: Optional[Tuple[pd.DataFrame, pd.Series]] = None,
         training_config: Optional[Dict[str, Any]] = None,
     ) -> None:
+        """Train the TabTransformer with optional validation data and training hyperparameters."""
         if training_config is None:
             training_config = {}
         utils.set_seed(training_config.get("seed", 42))
@@ -270,6 +287,7 @@ class SalesForecastTabTransformer(BaseModel):
             self.model.load_state_dict(self.best_state["model_state"])
 
     def _evaluate_loader(self, loader: DataLoader[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]) -> float:
+        """Compute RMSE over a dataloader and optionally cache the first attention map."""
         assert self.model is not None
         self.model.eval()
         losses = []
@@ -284,6 +302,7 @@ class SalesForecastTabTransformer(BaseModel):
         return float(np.sqrt(np.mean(losses))) if losses else 0.0
 
     def predict(self, X: pd.DataFrame) -> pd.Series:
+        """Generate predictions for a new feature frame using the trained network."""
         if self.model is None:
             raise RuntimeError("Model not trained")
         cat = self._transform_categories(X)
@@ -299,6 +318,7 @@ class SalesForecastTabTransformer(BaseModel):
         return pd.Series(preds, index=X.index, name="prediction")
 
     def save(self, path: str | Path) -> None:
+        """Persist model state, vocabularies, and scalers to disk."""
         if self.model is None:
             raise RuntimeError("Cannot save an untrained model")
         payload = {
@@ -314,6 +334,7 @@ class SalesForecastTabTransformer(BaseModel):
 
     @classmethod
     def load(cls, path: str | Path, device: str = "cpu") -> "SalesForecastTabTransformer":
+        """Load a saved TabTransformer model bundle from disk."""
         payload = torch.load(path, map_location="cpu")
         model = cls(
             payload["model_config"],

@@ -13,11 +13,13 @@ LOGGER = utils.configure_logging(__name__)
 
 
 def _has_rows(split: tuple[pd.DataFrame, pd.Series]) -> bool:
+    """Return True when the split contains at least one row."""
     X, _ = split
     return not X.empty
 
 
 def train_pipeline(config: Dict[str, Any], model_name: str) -> Dict[str, Any]:
+    """Orchestrate dataset loading, model training, evaluation, and artifact persistence."""
     X, y, metadata = data.load_dataset_from_config(config)
     date_series = metadata.get("dates")
     splits = data.time_aware_split(X, y, date_series, config.get("splits", {}))

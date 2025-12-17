@@ -30,12 +30,14 @@ def configure_logging(name: str = "tabtransformer_sales", level: int = logging.I
 
 
 def ensure_dir(path: str | Path) -> Path:
+    """Create a directory (parents included) if it does not exist and return the Path."""
     directory = Path(path)
     directory.mkdir(parents=True, exist_ok=True)
     return directory
 
 
 def _absolute_path(value: str | Path, base_dir: Path) -> Path:
+    """Resolve *value* relative to *base_dir* unless it is already absolute."""
     candidate = Path(value)
     if candidate.is_absolute():
         return candidate
@@ -43,6 +45,7 @@ def _absolute_path(value: str | Path, base_dir: Path) -> Path:
 
 
 def normalize_config_paths(config: Dict[str, Any], base_dir: Path) -> Dict[str, Any]:
+    """Return a copy of the config with key paths made absolute using *base_dir* as anchor."""
     paths_cfg = config.setdefault("paths", {})
     keys = [
         "raw_csv",
@@ -60,14 +63,21 @@ def normalize_config_paths(config: Dict[str, Any], base_dir: Path) -> Dict[str, 
 
 
 def load_yaml(path: str | Path) -> Dict[str, Any]:
-    with open(path, "r", encoding="utf-8") as fh:
-        data = yaml.safe_load(fh)
+    """Load YAML from disk and ensure the top-level object is a mapping."""
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            data = yaml.safe_load(fh)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(f"YAML config not found at {path}") from exc
+    except yaml.YAMLError as exc:
+        raise ValueError(f"Failed to parse YAML at {path}: {exc}") from exc
     if not isinstance(data, dict):
         raise ValueError(f"Config at {path} must be a mapping")
     return data
 
 
 def save_json(path: str | Path, payload: Dict[str, Any]) -> None:
+    """Persist a JSON-serializable payload to *path* with indentation for readability."""
     path = Path(path)
     ensure_dir(path.parent)
     with open(path, "w", encoding="utf-8") as fh:
@@ -75,11 +85,18 @@ def save_json(path: str | Path, payload: Dict[str, Any]) -> None:
 
 
 def read_json(path: str | Path) -> Dict[str, Any]:
-    with open(path, "r", encoding="utf-8") as fh:
-        return json.load(fh)
+    """Load JSON from disk and return the parsed mapping with helpful errors."""
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(f"JSON file not found at {path}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid JSON content in {path}: {exc}") from exc
 
 
 def set_seed(seed: int) -> None:
+    """Seed Python, NumPy, and Torch RNGs for reproducibility."""
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -89,6 +106,7 @@ def set_seed(seed: int) -> None:
 
 @contextmanager
 def timer(name: str, logger: Optional[logging.Logger] = None) -> Generator[None, None, None]:
+    """Context manager to log elapsed time around a code block."""
     start = time.time()
     try:
         yield
@@ -113,6 +131,7 @@ def get_artifact_dir(config: Dict[str, Any], model_name: str) -> Path:
 
 
 def infer_device(requested: str) -> torch.device:
+    """Infer the torch.device to use given a requested string such as 'cpu' or 'cuda'."""
     requested = requested.lower()
     if requested == "cuda" and torch.cuda.is_available():
         return torch.device("cuda")

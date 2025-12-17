@@ -24,6 +24,7 @@ else:
 
 
 def _one_hot_encoder() -> OneHotEncoder:
+    """Create a OneHotEncoder that works across sklearn versions (handles sparse_output rename)."""
     params: Dict[str, Any] = {"handle_unknown": "ignore"}
     signature = inspect.signature(OneHotEncoder.__init__)
     if "sparse_output" in signature.parameters:
@@ -34,8 +35,10 @@ def _one_hot_encoder() -> OneHotEncoder:
 
 
 class _PreprocessorFactory:
+    """Helper to create reusable sklearn preprocessing pipelines."""
     @staticmethod
     def make(categorical: Iterable[str], numeric: Iterable[str]) -> ColumnTransformer:
+        """Build a ColumnTransformer with categorical encoders and numeric scalers."""
         cat_features = list(categorical)
         num_features = list(numeric)
         transformers = []
@@ -89,13 +92,16 @@ class LinearRegressionModel(BaseModel):
         )
 
     def fit(self, X: pd.DataFrame, y: pd.Series, **_: Any) -> None:
+        """Train the linear regression pipeline on the provided frame."""
         self.pipeline.fit(X, y)
 
     def predict(self, X: pd.DataFrame) -> pd.Series:
+        """Return predictions as a pandas Series aligned to input indices."""
         preds = self.pipeline.predict(X)
         return pd.Series(preds, index=X.index, name="prediction")
 
     def save(self, path: str | Path) -> None:
+        """Persist pipeline and feature metadata to disk via joblib."""
         payload = {
             "categorical_features": self.categorical_features,
             "numeric_features": self.numeric_features,
@@ -105,6 +111,7 @@ class LinearRegressionModel(BaseModel):
 
     @classmethod
     def load(cls, path: str | Path, **_: Any) -> "LinearRegressionModel":
+        """Reconstruct a saved LinearRegressionModel from disk."""
         payload = joblib.load(path)
         model = cls(payload["categorical_features"], payload["numeric_features"])
         model.pipeline = payload["pipeline"]
@@ -148,13 +155,16 @@ class XGBoostModel(BaseModel):
         )
 
     def fit(self, X: pd.DataFrame, y: pd.Series, **_: Any) -> None:
+        """Train the XGBoost pipeline on the provided frame."""
         self.pipeline.fit(X, y)
 
     def predict(self, X: pd.DataFrame) -> pd.Series:
+        """Return predictions as a pandas Series aligned to input indices."""
         preds = self.pipeline.predict(X)
         return pd.Series(preds, index=X.index, name="prediction")
 
     def save(self, path: str | Path) -> None:
+        """Persist pipeline and feature metadata to disk via joblib."""
         payload = {
             "categorical_features": self.categorical_features,
             "numeric_features": self.numeric_features,
@@ -164,6 +174,7 @@ class XGBoostModel(BaseModel):
 
     @classmethod
     def load(cls, path: str | Path, **_: Any) -> "XGBoostModel":
+        """Reconstruct a saved XGBoostModel from disk."""
         payload = joblib.load(path)
         model = cls(payload["categorical_features"], payload["numeric_features"], params={})
         model.pipeline = payload["pipeline"]

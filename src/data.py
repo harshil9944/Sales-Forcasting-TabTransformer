@@ -24,6 +24,7 @@ REQUIRED_COLUMNS = {
 
 
 def _maybe_merge_store_metadata(df: pd.DataFrame, config: Dict[str, Any]) -> pd.DataFrame:
+    """Merge store-level metadata (e.g., CompetitionDistance) if missing from the raw frame."""
     if "CompetitionDistance" in df.columns:
         return df
     store_path = config.get("paths", {}).get("store_csv")
@@ -43,12 +44,14 @@ def _maybe_merge_store_metadata(df: pd.DataFrame, config: Dict[str, Any]) -> pd.
 
 
 def _validate_input(df: pd.DataFrame) -> None:
+    """Assert that all required Rossmann columns are present in the incoming dataframe."""
     missing = REQUIRED_COLUMNS.difference(df.columns)
     if missing:
         raise ValueError(f"Input data missing required columns: {sorted(missing)}")
 
 
 def _cast_categoricals(df: pd.DataFrame, categorical_cols: List[str]) -> pd.DataFrame:
+    """Convert configured categorical columns to pandas categorical dtype when available."""
     for col in categorical_cols:
         if col in df.columns:
             df[col] = df[col].astype("category")
@@ -56,6 +59,7 @@ def _cast_categoricals(df: pd.DataFrame, categorical_cols: List[str]) -> pd.Data
 
 
 def _add_time_features(df: pd.DataFrame) -> None:
+    """Add standard calendar-derived features in-place from the parsed Date column."""
     df["year"] = df["Date"].dt.year
     df["month"] = df["Date"].dt.month
     df["day"] = df["Date"].dt.day
@@ -64,6 +68,7 @@ def _add_time_features(df: pd.DataFrame) -> None:
 
 
 def _add_lag_features(df: pd.DataFrame, horizon: int) -> None:
+    """Create lagged and rolling sales statistics grouped by store for the forecast horizon."""
     group = df.groupby("Store", group_keys=False)
     df["target"] = group["Sales"].shift(-horizon)
     for lag in (1, 7, 14):
@@ -75,6 +80,7 @@ def _add_lag_features(df: pd.DataFrame, horizon: int) -> None:
 
 
 def _sanitize_numeric(df: pd.DataFrame, numeric_cols: List[str]) -> None:
+    """Fill missing numeric values using median/ffill heuristics tailored to the dataset."""
     df["CompetitionDistance"] = df["CompetitionDistance"].fillna(df["CompetitionDistance"].median())
     for col in numeric_cols:
         if col not in df.columns:
@@ -92,6 +98,7 @@ def _build_metadata(
     target_column: str,
     processed_path: Path,
 ) -> Dict[str, Any]:
+    """Summarize processed dataset details for reproducibility and inspection."""
     return {
         "feature_columns": feature_cols,
         "categorical_features": categorical,
@@ -107,6 +114,7 @@ def _build_metadata(
 
 
 def _target_output_name(features_cfg: Dict[str, Any]) -> str:
+    """Construct a target column name that encodes the forecasting horizon."""
     base = features_cfg.get("target", "Sales")
     horizon = int(features_cfg.get("horizon", 1))
     suffix = "_target" if horizon == 1 else f"_target_h{horizon}"
@@ -204,6 +212,7 @@ def load_sales_data(csv_path: str | Path, config: Dict[str, Any], save: bool = T
 
 
 def load_dataset_from_config(config: Dict[str, Any], prefer_processed: bool = True) -> Tuple[pd.DataFrame, pd.Series, Dict[str, Any]]:
+    """Load processed parquet when available; otherwise fall back to raw CSV feature engineering."""
     processed_path, metadata_path = utils.resolve_processed_paths(config)
     features_cfg = config.get("features", {})
     target_column = _target_output_name(features_cfg)
@@ -237,6 +246,7 @@ def time_aware_split(
     dates: pd.Series,
     splits_config: Dict[str, Any],
 ) -> Dict[str, Tuple[pd.DataFrame, pd.Series]]:
+    """Create chronological train/val/test splits using either ratios or explicit date cut-offs."""
     if dates is None or dates.empty:
         raise ValueError("Dates are required for time-based splitting")
     df = pd.DataFrame({"date": pd.to_datetime(dates).reset_index(drop=True)})
