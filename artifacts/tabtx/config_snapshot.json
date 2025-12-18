@@ -1,4 +1,5 @@
 {
+  "experiment_name": "horizon_study_h14",
   "features": {
     "categorical": [
       "Store",
@@ -7,7 +8,7 @@
       "StateHoliday",
       "SchoolHoliday"
     ],
-    "horizon": 1,
+    "horizon": 14,
     "numeric": [
       "Customers",
       "Sales",

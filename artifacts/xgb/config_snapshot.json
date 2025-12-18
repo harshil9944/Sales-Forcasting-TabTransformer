@@ -1,4 +1,5 @@
 {
+  "experiment_name": "baseline_run",
   "features": {
     "categorical": [
       "Store",
