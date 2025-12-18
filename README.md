@@ -36,6 +36,30 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
+## Run Guide
+1. Configure paths: edit `config/default.yaml` so `paths.raw_csv` (and related train/test/store paths) point to your CSVs; confirm `processed_dir` and `artifacts_dir` exist or are writable.
+2. Prepare data (build processed parquet/metadata):
+   ```bash
+   python -m tabtransformer_sales.src.cli prepare --config config/default.yaml
+   ```
+3. Train a model (`linreg`, `xgb`, or `tabtx`):
+   ```bash
+   python -m tabtransformer_sales.src.cli train --config config/default.yaml --model tabtx
+   ```
+4. Evaluate on a split (`train`, `val`, or `test`):
+   ```bash
+   python -m tabtransformer_sales.src.cli eval --config config/default.yaml --model tabtx --split test
+   ```
+5. Predict on new CSV data:
+   ```bash
+   python -m tabtransformer_sales.src.cli predict --config config/default.yaml --model tabtx --input path/to/your.csv --output artifacts/tabtx/preds.csv
+   ```
+6. Inspect outputs: processed data under `data/processed/`; artifacts (model, metrics, plots, config snapshot) under `artifacts/{model}/`.
+7. Optional: run tests to verify the setup:
+   ```bash
+   pytest -q
+   ```
+
 ## Configuration
 Edit `config/default.yaml` to point to your raw CSV (Rossmann schema) and to control feature lists, splits, and training hyper-parameters. Key sections:
 - `paths`: raw CSV, processed parquet directory, artifact root
@@ -46,10 +70,10 @@ Edit `config/default.yaml` to point to your raw CSV (Rossmann schema) and to con
 
 ## CLI Usage
 ```
-python -m tabtransformer_sales.src.cli prepare --config config/default.yaml
-python -m tabtransformer_sales.src.cli train   --config config/default.yaml --model tabtx
-python -m tabtransformer_sales.src.cli eval    --config config/default.yaml --model tabtx
-python -m tabtransformer_sales.src.cli predict --config config/default.yaml --model tabtx --input data/raw/sample.csv --output artifacts/tabtx/preds.csv
+python -m src.cli prepare --config config/default.yaml
+python -m src.cli train   --config config/default.yaml --model tabtx
+python -m src.cli eval    --config config/default.yaml --model tabtx
+python -m src.cli predict --config config/default.yaml --model tabtx --input data/raw/sample.csv --output artifacts/tabtx/preds.csv
 ```
 Each command saves outputs under `artifacts/{model_name}/` and logs metrics to stdout.
 
