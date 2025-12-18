@@ -123,12 +123,22 @@ def resolve_processed_paths(config: Dict[str, Any]) -> tuple[Path, Path]:
     metadata_filename = paths_cfg.get("metadata_filename", "metadata.json")
     return processed_dir / processed_filename, processed_dir / metadata_filename
 
-
 def get_artifact_dir(config: Dict[str, Any], model_name: str) -> Path:
-    base = Path(config.get("paths", {}).get("artifacts_dir", "artifacts")) / model_name
-    ensure_dir(base)
-    return base
-
+    """
+    Return the artifact directory for a given model.
+    If config['experiment_name'] is set, artifacts are written to:
+        artifacts/<experiment_name>/<model_name>/
+    Otherwise, default to:
+        artifacts/<model_name>/
+    """
+    artifacts_root = Path(config.get("paths", {}).get("artifacts_dir", "artifacts"))
+    exp_name = str(config.get("experiment_name", "")).strip()
+    if exp_name:
+        out_dir = artifacts_root / exp_name / model_name
+    else:
+        out_dir = artifacts_root / model_name
+    out_dir.mkdir(parents=True, exist_ok=True)
+    return out_dir
 
 def infer_device(requested: str) -> torch.device:
     """Infer the torch.device to use given a requested string such as 'cpu' or 'cuda'."""

@@ -1,3 +1,5 @@
+experiment_name: baseline_run
+
 paths:
   raw_csv: data/raw/train.csv
   train_csv: data/raw/train.csv

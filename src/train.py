@@ -43,6 +43,7 @@ def train_pipeline(config: Dict[str, Any], model_name: str) -> Dict[str, Any]:
         LOGGER.info("%s split metrics:\n%s", split_name.capitalize(), MetricsReport(metric_values, label=split_name))
 
     artifact_dir = utils.get_artifact_dir(config, model.name)
+    utils.save_json(artifact_dir / "config_snapshot.json", config)
     if isinstance(model, SalesForecastTabTransformer):
         model_path = artifact_dir / "model.pt"
     else:
