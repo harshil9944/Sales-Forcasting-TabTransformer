@@ -29,40 +29,40 @@
     "fit_intercept": true
   },
   "paths": {
-    "artifacts_dir": "D:\\Semester-3\\AAI-551 Python\\Project\\tabtransformer_sales\\artifacts",
+    "artifacts_dir": "C:\\Users\\Chris\\Desktop\\To Submit\\PythonEngineering\\FinalProject\\local_FinalProject\\Sales-Forcasting-TabTransformer\\artifacts",
     "metadata_filename": "metadata.json",
-    "processed_dir": "D:\\Semester-3\\AAI-551 Python\\Project\\tabtransformer_sales\\data\\processed",
+    "processed_dir": "C:\\Users\\Chris\\Desktop\\To Submit\\PythonEngineering\\FinalProject\\local_FinalProject\\Sales-Forcasting-TabTransformer\\data\\processed",
     "processed_filename": "sales_processed.parquet",
-    "raw_csv": "D:\\Semester-3\\AAI-551 Python\\Project\\tabtransformer_sales\\data\\raw\\train.csv",
-    "store_csv": "D:\\Semester-3\\AAI-551 Python\\Project\\tabtransformer_sales\\data\\raw\\store.csv",
-    "test_csv": "D:\\Semester-3\\AAI-551 Python\\Project\\tabtransformer_sales\\data\\raw\\test.csv",
-    "train_csv": "D:\\Semester-3\\AAI-551 Python\\Project\\tabtransformer_sales\\data\\raw\\train.csv"
+    "raw_csv": "C:\\Users\\Chris\\Desktop\\To Submit\\PythonEngineering\\FinalProject\\local_FinalProject\\Sales-Forcasting-TabTransformer\\data\\raw\\notebook_synthetic.csv",
+    "store_csv": "data/raw/store.csv",
+    "test_csv": "data/raw/test.csv",
+    "train_csv": "data/raw/train.csv"
   },
   "splits": {
     "strategy": "ratios",
-    "test_ratio": 0.15,
-    "train_ratio": 0.7,
-    "val_ratio": 0.15
+    "test_ratio": 0.2,
+    "train_ratio": 0.6,
+    "val_ratio": 0.2
   },
   "tabtransformer": {
-    "d_model": 64,
+    "d_model": 128,
     "dropout": 0.1,
     "emb_strategy": "auto",
-    "ff_dim": 128,
+    "ff_dim": 256,
     "n_heads": 4,
-    "n_layers": 2
+    "n_layers": 4
   },
   "training": {
-    "amp": true,
-    "batch_size": 128,
-    "device": "cuda",
-    "epochs": 30,
+    "amp": false,
+    "batch_size": 32,
+    "device": "cpu",
+    "epochs": 2,
     "grad_clip": 1.0,
-    "lr": 0.001,
-    "patience": 5,
+    "lr": 0.0005,
+    "patience": 1,
     "plot_attention": false,
-    "seed": 42,
-    "weight_decay": 0.01
+    "seed": 123,
+    "weight_decay": 0.0001
   },
   "xgboost": {
     "colsample_bytree": 0.8,

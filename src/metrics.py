@@ -42,18 +42,21 @@ class MetricsReport:
         if not isinstance(self.values, dict):
             raise TypeError("values must be a dictionary of metric name to float")
 
-    def __add__(self, other: "MetricsReport") -> "MetricsReport":
+    def __add__(self, other: "MetricsReport | Dict[str, float]") -> "MetricsReport":
+        other_vals = other.values if isinstance(other, MetricsReport) else other
         merged: Dict[str, float] = {}
-        keys = set(self.values) | set(other.values)
+        keys = set(self.values) | set(other_vals)
         for key in keys:
-            merged[key] = self.values.get(key, 0.0) + other.values.get(key, 0.0)
-        label = self.label if self.label is not None else other.label
+            merged[key] = self.values.get(key, 0.0) + other_vals.get(key, 0.0)
+        label = self.label if self.label is not None else (other.label if isinstance(other, MetricsReport) else None)
         return MetricsReport(merged, label=label)
 
     def __truediv__(self, scalar: float) -> "MetricsReport":
+        if not isinstance(scalar, (int, float)):
+            raise TypeError("Can only divide metrics by a number")
         if scalar == 0:
             raise ZeroDivisionError("Cannot divide metrics by zero")
-        scaled = {k: v / scalar for k, v in self.values.items()}
+        scaled = {k: float(v) / float(scalar) for k, v in self.values.items()}
         return MetricsReport(scaled, label=self.label)
 
     def __str__(self) -> str:  # pragma: no cover - formatting helper

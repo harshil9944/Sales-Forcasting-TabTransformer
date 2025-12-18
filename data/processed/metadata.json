@@ -6,8 +6,8 @@
     "StateHoliday",
     "SchoolHoliday"
   ],
-  "date_max": "2015-07-30T00:00:00",
-  "date_min": "2013-01-01T00:00:00",
+  "date_max": "2024-02-28T00:00:00",
+  "date_min": "2024-01-01T00:00:00",
   "feature_columns": [
     "Store",
     "DayOfWeek",
@@ -30,7 +30,7 @@
   ],
   "horizon": 1,
   "n_features": 18,
-  "n_rows": 1016094,
+  "n_rows": 177,
   "numeric_features": [
     "Customers",
     "Sales",
@@ -46,6 +46,6 @@
     "weekofyear",
     "is_weekend"
   ],
-  "processed_path": "D:\\Semester-3\\AAI-551 Python\\Project\\tabtransformer_sales\\data\\processed\\sales_processed.parquet",
+  "processed_path": "C:\\Users\\Chris\\Desktop\\To Submit\\PythonEngineering\\FinalProject\\local_FinalProject\\Sales-Forcasting-TabTransformer\\data\\processed\\sales_processed.parquet",
   "target": "Sales_target"
 }
