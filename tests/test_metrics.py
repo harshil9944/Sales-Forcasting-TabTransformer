@@ -1,7 +1,7 @@
 ﻿import numpy as np
 import pytest
 
-from tabtransformer_sales.src import metrics
+from src import metrics
 
 
 def test_evaluate_metrics_outputs_expected_values() -> None:

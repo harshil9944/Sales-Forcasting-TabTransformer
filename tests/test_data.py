@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from tabtransformer_sales.src import data
+from src import data
 
 
 def _synthetic_frame() -> pd.DataFrame:

@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 import yaml
 
-from tabtransformer_sales.src import cli
+from src import cli
 
 
 def _synthetic_csv(path: Path) -> Path:

@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from tabtransformer_sales.src.models import LinearRegressionModel, SalesForecastTabTransformer, XGBoostModel
+from src.models import LinearRegressionModel, SalesForecastTabTransformer, XGBoostModel
 
 CATEGORICAL = ["Store", "DayOfWeek", "Promo", "StateHoliday", "SchoolHoliday"]
 NUMERIC = [
